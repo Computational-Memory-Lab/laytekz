@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Laytekz</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body class="offline">
+<main>
+  <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M7 18h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.5 4.5 0 0 0 7 18z"/>
+    <path d="M3 3l18 18"/>
+  </svg>
+  <h1 data-testid="offline-title">Can't reach <span id="host">the server</span></h1>
+  <p id="reason" data-testid="offline-reason"></p>
+  <p id="status" class="muted" data-testid="offline-status" aria-live="polite"></p>
+  <div class="buttons">
+    <button id="retry" class="primary" data-testid="offline-retry">Retry Now</button>
+    <button id="change" data-testid="offline-change-server">Change Server…</button>
+  </div>
+</main>
+<script src="offline.js"></script>
+</body>
+</html>

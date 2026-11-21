@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<!-- Laytekz compiler: make TeX Live's OpenType/TrueType/Type 1 fonts visible to
+     XeLaTeX by name (\setmainfont{TeX Gyre Pagella}), as upstream's TeX Live
+     image does system-wide. Installed as
+     ~/galley-server/compiler-home/.config/fontconfig/fonts.conf and read through
+     /etc/fonts/conf.d/50-user.conf. The cache is built by warm-caches.sh. -->
+<fontconfig>
+  <dir>@TEXLIVE@/texmf-dist/fonts/opentype</dir>
+  <dir>@TEXLIVE@/texmf-dist/fonts/truetype</dir>
+  <dir>@TEXLIVE@/texmf-dist/fonts/type1</dir>
+</fontconfig>

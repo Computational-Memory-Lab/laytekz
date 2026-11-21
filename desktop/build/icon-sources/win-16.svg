@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <title>Laytekz for Windows (16 px)</title>
+  <!--
+    Windows 16 px Laytekz icon: the content of icon-16.svg on the Windows grid,
+    where the tile fills 14 x 14 px (1 px margin) instead of the macOS 12.875.
+  -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="1" x2="0" y2="15" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3a3d44"/>
+      <stop offset="1" stop-color="#1d1e22"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="1" x2="0" y2="15" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.08"/>
+    </linearGradient>
+    <path id="tileShape" d="M9.96 1c1.76 0 2.65 0 3.32.34a3.15 3.15 0 0 1 1.38 1.38c.34.67.34 1.56.34 3.32L15 9.96c0 1.76 0 2.65-.34 3.32a3.15 3.15 0 0 1-1.38 1.38c-.67.34-1.56.34-3.32.34L6.04 15c-1.76 0-2.65 0-3.32-.34a3.15 3.15 0 0 1-1.38-1.38c-.34-.67-.34-1.56-.34-3.32L1 6.04c0-1.76 0-2.65.34-3.32a3.15 3.15 0 0 1 1.38-1.38c.67-.34 1.56-.34 3.32-.34Z"/>
+    <clipPath id="tileClip"><use href="#tileShape"/></clipPath>
+  </defs>
+
+  <use href="#tileShape" fill="url(#tile)" shape-rendering="geometricPrecision"/>
+
+  <g clip-path="url(#tileClip)">
+    <rect x="4" y="3" width="8" height="12" fill="#f6f3ec"/>
+    <path d="M5 4h6v1H5zM5 6h3v1H5zM9 6h2v1H9zM6 11h5v1H6zM5 13h4v1H5z" fill="#33363d"/>
+  </g>
+
+  <use href="#tileShape" fill="none" stroke="url(#rim)" stroke-width="1" clip-path="url(#tileClip)" shape-rendering="geometricPrecision"/>
+
+  <path d="M8 7h1v1H8zM7 8h1v1H7zM9 8h1v1H9zM6 9h1v1H6zM10 9h1v1h-1z" fill="#ef4a3a"/>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <title>Laytekz for Windows (48 px)</title>
+  <!--
+    Windows 48 px Laytekz icon: the content of icon-48.svg on the Windows grid,
+    where the tile fills 42 x 42 px (3 px margin), without the macOS drop shadow.
+  -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="3" x2="0" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#363940"/>
+      <stop offset="1" stop-color="#191a1e"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="3" x2="0" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.22"/>
+      <stop offset="0.4" stop-color="#fff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="8" x2="0" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fcfbf7"/>
+      <stop offset="1" stop-color="#e9e4d8"/>
+    </linearGradient>
+    <filter id="sheetShadow" x="-25%" y="-10%" width="150%" height="125%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="0.45" stdDeviation="0.75" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <path id="tileShape" d="M29.88 3c5.29 0 7.94 0 9.96 1.03a9.45 9.45 0 0 1 4.13 4.13c1.03 2.02 1.03 4.67 1.03 9.96L45 29.88c0 5.29 0 7.94-1.03 9.96a9.45 9.45 0 0 1-4.13 4.13c-2.02 1.03-4.67 1.03-9.96 1.03L18.12 45c-5.29 0-7.94 0-9.96-1.03a9.45 9.45 0 0 1-4.13-4.13c-1.03-2.02-1.03-4.67-1.03-9.96L3 18.12c0-5.29 0-7.94 1.03-9.96a9.45 9.45 0 0 1 4.13-4.13c2.02-1.03 4.67-1.03 9.96-1.03Z"/>
+    <clipPath id="tileClip"><use href="#tileShape"/></clipPath>
+  </defs>
+
+  <use href="#tileShape" fill="url(#tile)"/>
+
+  <g clip-path="url(#tileClip)">
+    <rect x="16" y="8" width="16" height="40" rx="0.75" fill="url(#paper)" filter="url(#sheetShadow)"/>
+    <g fill="#33363d">
+      <rect x="18" y="11" width="12" height="2" rx="0.5"/>
+      <rect x="18" y="16" width="12" height="2" rx="0.5"/>
+      <rect x="18" y="21" width="6" height="2" rx="0.5"/>
+      <rect x="28" y="21" width="2" height="2" rx="0.5"/>
+      <rect x="20" y="31" width="10" height="2" rx="0.5"/>
+      <rect x="18" y="36" width="12" height="2" rx="0.5"/>
+      <rect x="18" y="41" width="9" height="2" rx="0.5"/>
+    </g>
+  </g>
+
+  <use href="#tileShape" fill="none" stroke="url(#rim)" stroke-width="1" clip-path="url(#tileClip)"/>
+
+  <path d="M22 28 26 24 30 28" fill="none" stroke="#ef4a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="miter" stroke-miterlimit="4"/>
+</svg>

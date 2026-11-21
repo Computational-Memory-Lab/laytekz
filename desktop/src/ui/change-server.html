@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Change Server</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body class="dialog">
+<form id="form" novalidate>
+  <h1>Change server</h1>
+  <p class="muted">Laytekz opens one server. The app checks that it answers before switching.</p>
+  <label for="url">Server address</label>
+  <input id="url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://latex.example.com" data-testid="server-url">
+  <p id="message" class="message" role="status" aria-live="polite" data-testid="server-message"></p>
+  <div class="buttons">
+    <button type="button" id="default" class="link" data-testid="server-default">Use default</button>
+    <span class="spacer"></span>
+    <button type="button" id="cancel" data-testid="server-cancel">Cancel</button>
+    <button type="submit" id="save" class="primary" data-testid="server-save">Connect</button>
+  </div>
+</form>
+<script src="change-server.js"></script>
+</body>
+</html>

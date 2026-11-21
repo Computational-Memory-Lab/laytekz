@@ -1,0 +1,28 @@
+{
+  "name": "laytekz",
+  "productName": "Laytekz",
+  "version": "1.0.0",
+  "description": "Desktop app for Laytekz, a self-hosted collaborative LaTeX editor",
+  "author": "Computational Memory Lab",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "src/main/main.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "playwright test",
+    "test:packaged": "node tests/smoke-packaged.mjs",
+    "pack:mac": "electron-builder --mac --dir",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist": "electron-builder --mac --win"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "electron": "45.4.1",
+    "electron-builder": "26.18.0"
+  }
+}

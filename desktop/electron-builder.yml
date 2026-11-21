@@ -1,0 +1,76 @@
+# electron-builder configuration for Laytekz (https://www.electron.build/configuration)
+appId: com.devon7y.laytekz
+productName: Laytekz
+copyright: Copyright © 2026 Computational Memory Lab
+
+directories:
+  output: dist
+  buildResources: build
+
+# Only what the app runs: main process, preload, local pages, package.json.
+files:
+  - package.json
+  - src/**/*
+  - "!**/*.map"
+  - "!**/.DS_Store"
+asar: true
+publish: null
+
+# Electron fuses for a shell that loads remote content.
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  onlyLoadAppFromAsar: true
+  enableEmbeddedAsarIntegrityValidation: true
+  enableCookieEncryption: true
+  grantFileProtocolExtraPrivileges: false
+  loadBrowserProcessSpecificV8Snapshot: false
+
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+  icon: build/icon.icns
+  category: public.app-category.productivity
+  # No Developer ID: sign ad hoc (identity "-") so Apple Silicon runs it; no notarization.
+  # The hardened runtime stops DYLD_INSERT_LIBRARIES and similar from loading code
+  # into the app; build/entitlements.mac.plist lists the only exceptions.
+  identity: "-"
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  gatekeeperAssess: false
+  notarize: false
+  darkModeSupport: true
+
+dmg:
+  sign: false
+  writeUpdateInfo: false
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+  icon: build/icon.ico
+  # No code-signing certificate: keep resource editing (icon, version info), skip signing.
+  signExecutable: false
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Laytekz
+  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
+  # One installer per architecture, not an extra combined x64+arm64 one.
+  buildUniversalInstaller: false
+  differentialPackage: false
+
+linux:
+  icon: build/icon.png

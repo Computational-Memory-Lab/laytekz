@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>Laytekz</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body class="toast">
+<div class="row" id="row" role="status" aria-live="polite">
+  <span class="spinner" id="spinner" hidden></span>
+  <p id="message" data-testid="toast-message"></p>
+  <div id="actions"></div>
+  <button class="icon" id="dismiss" aria-label="Dismiss" data-testid="toast-dismiss" hidden>&#215;</button>
+</div>
+<script src="toast.js"></script>
+</body>
+</html>

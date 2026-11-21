@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <title>Laytekz (16 px)</title>
+  <!--
+    Hand-hinted Laytekz icon for 16 px. Same macOS grid as ../icon.svg (tile
+    12.875 px at 1.5625); the sheet is widened to 8 px so it carries four
+    1 px lines and a 5 x 3 px pixel caret whose point sits under the gap
+    in the second line.
+  -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="1.5625" x2="0" y2="14.4375" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3a3d44"/>
+      <stop offset="1" stop-color="#1d1e22"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="1.5625" x2="0" y2="14.4375" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.08"/>
+    </linearGradient>
+    <path id="tileShape" d="M9.8 1.5625c1.62 0 2.43 0 3.05.32a2.9 2.9 0 0 1 1.27 1.27c.32.62.32 1.43.32 3.05L14.4375 9.8c0 1.62 0 2.43-.32 3.05a2.9 2.9 0 0 1-1.27 1.27c-.62.32-1.43.32-3.05.32L6.2 14.4375c-1.62 0-2.43 0-3.05-.32a2.9 2.9 0 0 1-1.27-1.27c-.32-.62-.32-1.43-.32-3.05L1.5625 6.2c0-1.62 0-2.43.32-3.05a2.9 2.9 0 0 1 1.27-1.27c.62-.32 1.43-.32 3.05-.32Z"/>
+    <clipPath id="tileClip"><use href="#tileShape"/></clipPath>
+  </defs>
+
+  <use href="#tileShape" fill="url(#tile)" shape-rendering="geometricPrecision"/>
+
+  <g clip-path="url(#tileClip)">
+    <rect x="4" y="3" width="8" height="12" fill="#f6f3ec"/>
+    <path d="M5 4h6v1H5zM5 6h3v1H5zM9 6h2v1H9zM6 11h5v1H6zM5 13h4v1H5z" fill="#33363d"/>
+  </g>
+
+  <use href="#tileShape" fill="none" stroke="url(#rim)" stroke-width="1" clip-path="url(#tileClip)" shape-rendering="geometricPrecision"/>
+
+  <path d="M8 7h1v1H8zM7 8h1v1H7zM9 8h1v1H9zM6 9h1v1H6zM10 9h1v1h-1z" fill="#ef4a3a"/>
+</svg>

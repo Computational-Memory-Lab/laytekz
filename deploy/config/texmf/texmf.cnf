@@ -1,0 +1,47 @@
+% Laytekz compiler override for kpathsea (TeX Live's configuration reader).
+%
+% The compiler's environment sets TEXMFCNF to this directory followed by an
+% empty entry, so kpathsea reads THIS file first and then TeX Live's own
+% texmf.cnf files. For any variable defined in several files the first
+% definition wins, so the values below beat TeX Live's defaults. The three
+% security switches are ALSO exported as environment variables in
+% compiler.env, and environment variables beat every texmf.cnf, so they hold
+% even if this file went missing.
+%
+% None of this is the boundary on its own. Measured on TeX Live 2026:
+% openin_any = p does NOT stop \openin or \input of absolute or ../ paths
+% (not even in plain tex), and LuaTeX's Lua io.open reads anything. The read
+% boundary is galley-sandbox (Landlock + seccomp), which every TeX run is
+% inside. See deploy/README.md, "Security model".
+
+% Input: paranoid on paper (no absolute paths, no "..", no dot-files); kept
+% for whatever TeX Live does enforce now or later.
+openin_any = p
+% Output: only below the working directory (or the -output-directory),
+% never absolute, never "..", never a dot-file or dot-directory.
+openout_any = p
+% Restricted \write18: only TeX Live's vetted list (shell_escape_commands,
+% left at TeX Live's default: bibtex, makeindex, kpsewhich, repstopdf, ...).
+% Arbitrary commands are refused. Same posture as upstream Aldine.
+shell_escape = p
+
+% "%&format" on a document's first line would let a project pick a format
+% file; formats are trusted memory dumps, so documents may not choose one.
+parse_first_line = f
+% Formats come only from TeX Live (and, via the TEXFORMATS environment
+% variable the compiler sets itself, from its own precompiled-preamble
+% directory). TeX Live's default also searches ".", the project.
+TEXFORMATS = $TEXMF/web2c{/$engine,}
+
+% The compiler's private trees, all inside its own HOME
+% (~/galley-server/compiler-home), never the owner's ~/texmf or ~/.texlive.
+TEXMFHOME = ~/texmf
+TEXMFVAR = ~/texmf-var
+TEXMFCONFIG = ~/texmf-config
+% Where luaotfload (LuaLaTeX's font loader) reads and writes its caches: the
+% first writable entry gets new files, all entries are read. TeX Live's
+% default puts its own texmf-var (TEXMFSYSVAR) first; here the compiler's
+% caches come first, so warm-caches.sh writes inside ~/galley-server only.
+% Each TeX run gets a private TEXMFVAR (writable), then reads the warmed
+% ~/texmf-var and TeX Live's own caches (both read-only to it).
+TEXMFCACHE = $TEXMFVAR;~/texmf-var;$TEXMFSYSVAR
