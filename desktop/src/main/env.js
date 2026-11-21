@@ -57,4 +57,9 @@ export const test = Object.freeze({
   signinTimeoutMs: fromSource ? positiveInt(env.LAYTEKZ_TEST_SIGNIN_TIMEOUT_MS) : null,
   signinDebounceMs: fromSource ? positiveInt(env.LAYTEKZ_TEST_SIGNIN_DEBOUNCE_MS) : null,
   retryBaseMs: fromSource ? positiveInt(env.LAYTEKZ_TEST_RETRY_MS) : null,
+  // Galley: V2 desktop shell (WP09): a module whose default export is a list
+  // of extra shell features (tests/mocks/_probe-feature.mjs), appended to
+  // SHELL_FEATURES so the tests can drive the feature host. From source only.
+  shellFeatures: fromSource && env.LAYTEKZ_TEST_SHELL_FEATURES && path.isAbsolute(env.LAYTEKZ_TEST_SHELL_FEATURES)
+    ? env.LAYTEKZ_TEST_SHELL_FEATURES : null,
 });

@@ -11,11 +11,15 @@
 // ignored by a packaged build, that every fuse is as electron-builder.yml
 // sets it, that the macOS signature carries the hardened runtime, and that a
 // command-line switch makes the app exit before its DevTools server starts.
+// Galley: V2 console (WP17): node-pty ships unpacked, with only this target's
+// prebuild, an executable and validly signed spawn-helper, and it spawns a shell.
 
 import fuses from '@electron/fuses'; // installed with electron-builder
 import { spawn, spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import { _electron as electron } from '@playwright/test';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -90,6 +94,66 @@ check(/flags=0x\w*\([^)]*\bruntime\b[^)]*\)/.test(signature), `the signature has
   check(code === 1, `--remote-debugging-port makes the packaged app exit with status 1 (got ${code})`);
   check(!/DevTools listening/.test(out), 'and no DevTools server ever listened');
   fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+}
+
+// ---- Galley: V2 console (WP17): the console's terminal as packaged ----
+{
+  const unpacked = path.join(bundle, 'Contents', 'Resources', 'app.asar.unpacked', 'node_modules', 'node-pty');
+  const prebuild = path.join(unpacked, 'prebuilds', `darwin-${process.arch}`);
+  const helper = path.join(prebuild, 'spawn-helper');
+  const ptyNode = path.join(prebuild, 'pty.node');
+  check(fs.existsSync(ptyNode) && fs.existsSync(helper), 'node-pty is unpacked next to the asar, with this target\'s prebuild');
+  check(fs.existsSync(helper) && (fs.statSync(helper).mode & 0o111) === 0o111, 'spawn-helper is executable (build/after-pack.cjs)');
+  const kept = fs.existsSync(path.join(unpacked, 'prebuilds')) ? fs.readdirSync(path.join(unpacked, 'prebuilds')) : [];
+  check(kept.length === 1 && kept[0] === `darwin-${process.arch}`, `only this target's prebuild ships (${kept.join(', ')})`);
+  for (const file of [helper, ptyNode]) {
+    const verify = spawnSync('codesign', ['--verify', '--strict', file], { encoding: 'utf8' });
+    check(verify.status === 0, `codesign --verify --strict ${path.basename(file)} ${verify.status === 0 ? 'passes' : verify.stderr.trim()}`);
+  }
+  const whole = spawnSync('codesign', ['--verify', '--strict', '--deep', bundle], { encoding: 'utf8' });
+  check(whole.status === 0, `codesign --verify --strict --deep on the app ${whole.status === 0 ? 'passes' : whole.stderr.trim()}`);
+  // The packaged binary cannot be driven (its inspector fuse is off), so the
+  // source Electron runs the packaged app.asar: the console's utility process
+  // then loads pty-host.js from the asar and node-pty from app.asar.unpacked,
+  // and the kernel checks spawn-helper's signature as it would in the app.
+  const asar = path.join(bundle, 'Contents', 'Resources', 'app.asar');
+  const consoleProfile = fs.mkdtempSync(path.join(os.tmpdir(), 'laytekz-packaged-console-'));
+  const consoleMock = await startMockServer();
+  const env = { ...process.env, LAYTEKZ_TEST_MODE: '1', LAYTEKZ_TEST_USER_DATA: consoleProfile, LAYTEKZ_TEST_SERVER_URL: consoleMock.url };
+  delete env.ELECTRON_RUN_AS_NODE;
+  let electronApp = null;
+  const inConsole = (code) => electronApp.evaluate(async ({ BrowserWindow }, js) => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      for (const view of win.contentView.children) {
+        const wc = view.webContents;
+        if (wc && !wc.isDestroyed() && wc.getURL() === 'laytekz-ui://app/console.html') return wc.executeJavaScript(js);
+      }
+    }
+    return null;
+  }, code);
+  try {
+    electronApp = await electron.launch({ args: [asar], env, executablePath: createRequire(import.meta.url)('electron') });
+    await electronApp.firstWindow();
+    await until(() => electronApp.evaluate(({ Menu }) => !!Menu.getApplicationMenu()?.getMenuItemById('console-toggle')), 'View → Console');
+    await electronApp.evaluate(({ Menu }) => Menu.getApplicationMenu().getMenuItemById('console-toggle').click());
+    await until(async () => (await inConsole('document.body.dataset.ready')) === '1', 'the console page');
+    await inConsole(`(() => {
+      const tab = document.querySelector('[data-testid="console-tab"]');
+      return window.laytekzConsole.input(tab.dataset.session, 'echo laytekz-$((6*7))\\r');
+    })()`);
+    const screen = () => inConsole(`document.querySelector('.xterm-rows')?.innerText || ''`);
+    const printed = await until(async () => {
+      const text = await screen();
+      return /laytekz-42|posix_spawnp|could not/i.test(text) ? text : null;
+    }, 'the shell to answer', 20_000).catch(() => screen());
+    check(/laytekz-42/.test(printed), `the packaged app.asar's console spawns a shell (${/laytekz-42/.test(printed) ? 'echo printed laytekz-42' : JSON.stringify(String(printed).trim().slice(-200))})`);
+  } catch (err) {
+    check(false, `the packaged app.asar's console spawns a shell: ${err.message}`);
+  } finally {
+    await electronApp?.evaluate(({ app }) => app.exit(0)).catch(() => {});
+    await consoleMock.close();
+    fs.rmSync(consoleProfile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+  }
 }
 
 const mock = await startMockServer({ autoSignIn: true });

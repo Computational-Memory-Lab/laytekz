@@ -141,6 +141,65 @@ export async function signInViaHandoff(ctx) {
   return { start, result };
 }
 
+// ------------------------------------------- shell features (Galley: V2, WP09)
+
+/** The test-only shell features (LAYTEKZ_TEST_SHELL_FEATURES): the probe, and one that fails to start. */
+export const PROBE_FEATURES = path.join(APP_DIR, 'tests', 'mocks', '_probe-feature.mjs');
+
+/** launchApp with the probe features running. */
+export function launchWithProbe(options = {}) {
+  return launchApp({ ...options, env: { LAYTEKZ_TEST_SHELL_FEATURES: PROBE_FEATURES, ...(options.env ?? {}) } });
+}
+
+/** Every item of the application menu, flattened: {id, label, role, accelerator, defaultAccelerator, visible, top}. */
+export async function menuItems(app) {
+  return app.evaluate(({ Menu }) => {
+    const out = [];
+    const walk = (menu, top) => {
+      for (const item of menu.items) {
+        out.push({
+          id: item.id ?? null,
+          label: item.label,
+          role: item.role ?? null,
+          type: item.type,
+          accelerator: item.accelerator ?? null,
+          defaultAccelerator: item.role && typeof item.getDefaultRoleAccelerator === 'function' ? item.getDefaultRoleAccelerator() ?? null : null,
+          visible: item.visible,
+          top,
+        });
+        if (item.submenu) walk(item.submenu, top ?? item.label);
+      }
+    };
+    walk(Menu.getApplicationMenu(), null);
+    return out;
+  });
+}
+
+/** Clicks an application menu item by id, as the menu does (test mode focuses no window, so usually none is passed). */
+export async function clickMenuItem(app, id) {
+  return app.evaluate(({ Menu, BrowserWindow }, itemId) => {
+    const item = Menu.getApplicationMenu().getMenuItemById(itemId);
+    if (!item) throw new Error(`no menu item ${itemId}`);
+    item.click(undefined, BrowserWindow.getFocusedWindow() ?? undefined);
+  }, id);
+}
+
+/** The local pages laid over each window: {window, url, partition, bounds}. */
+export async function overlayViews(app) {
+  return app.evaluate(({ BrowserWindow, session }) => {
+    const out = [];
+    for (const [index, win] of BrowserWindow.getAllWindows().entries()) {
+      for (const view of win.contentView.children) {
+        const wc = view.webContents;
+        if (!wc || wc.isDestroyed()) continue;
+        const partition = ['laytekz-ui', 'laytekz-probe', 'persist:laytekz'].find((p) => session.fromPartition(p) === wc.session) ?? 'other';
+        out.push({ window: index, url: wc.getURL(), partition, bounds: view.getBounds() });
+      }
+    }
+    return out;
+  });
+}
+
 /** Whether something is listening on a loopback URL's port. */
 export async function listening(rawUrl) {
   try {

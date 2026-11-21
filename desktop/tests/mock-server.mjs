@@ -7,11 +7,49 @@
 // integration round trip; http://127.0.0.1:<port> is the Laytekz origin.
 // The /hostile/* pages act without any user gesture, as stored XSS or a
 // malicious server could; the shell must contain what they try.
+//
+// Galley: V2 desktop shell (WP09). Each shell feature's server routes live in
+// their own module, tests/mocks/<id>.mjs (a leading _ skips a file), which
+// exports handle(req, res, ctx) → boolean | Promise<boolean> (true: answered)
+// and an optional `order` (default 500, lower first). They see a path only
+// when no route below claims it. ctx = {url, origin, port, cookies, user,
+// state, send(status, body, headers?), redirect(location, headers?),
+// readBody()}; a module keeps its records under its own key in `state`.
+// /api/capabilities answers like a V2 server; startMockServer({capabilities:
+// null}) answers 404, like V1.
 
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
 import http from 'node:http';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const TEST_USER = { id: 'u1', name: 'Test User', email: 'test.user@example.test' };
+
+export const DEFAULT_CAPABILITIES = Object.freeze({ rev: 'mock-1', accounts: true, prefs: true, mcp: false, oauthRegistration: 'closed' });
+
+const MOCKS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'mocks');
+let mocksLoaded = null;
+
+/** The modules in tests/mocks, sorted by order then name. */
+export function loadMocks() {
+  mocksLoaded ??= (async () => {
+    let names = [];
+    try {
+      names = (await fs.readdir(MOCKS_DIR)).filter((n) => n.endsWith('.mjs') && !n.startsWith('_')).sort();
+    } catch {
+      return [];
+    }
+    const mods = [];
+    for (const name of names) {
+      const mod = await import(pathToFileURL(path.join(MOCKS_DIR, name)).href);
+      if (typeof mod.handle !== 'function') continue;
+      mods.push({ name: name.slice(0, -4), order: Number.isFinite(mod.order) ? mod.order : 500, handle: mod.handle });
+    }
+    return mods.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+  })();
+  return mocksLoaded;
+}
 
 const CHALLENGE_RE = /^[A-Za-z0-9_-]{43}$/;
 const STATE_RE = /^[A-Za-z0-9_-]{16,128}$/;
@@ -64,6 +102,20 @@ const HOSTILE = {
     const a = document.createElement('a'); a.href = 'data:text/plain,planted'; a.download = 'planted.txt'; document.body.append(a); a.click();`),
 };
 
+// Galley: V2 (WP09): what the editor does with right-clicks. The zone cancels
+// its contextmenu event (as the editor's own menu will); the text area does
+// not, so a right-click on a misspelt word gets the shell's spelling menu.
+const EDITOR_SIM = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Editor – Mock</title>
+<style>body{margin:0;background:#1c1c1e;color:#f5f5f7;font:20px sans-serif} #text{position:absolute;left:20px;top:20px;width:560px;height:120px;font:24px sans-serif;background:#222}
+#zone{position:absolute;left:20px;top:200px;width:400px;height:120px;background:#333}</style></head>
+<body><div id="text" contenteditable="true" spellcheck="true" lang="en">Thiss sentense has mispelled wordz</div>
+<div id="zone">The page's own menu</div>
+<script>
+window.cancelled = 0;
+document.getElementById('zone').addEventListener('contextmenu', (e) => { e.preventDefault(); window.cancelled += 1; });
+document.body.dataset.ready = '1';
+</script></body></html>`;
+
 function appPage(options) {
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Projects – Mock</title>
@@ -103,7 +155,9 @@ export async function startMockServer(options = {}) {
     failExchange: false,
     redirectExchange: false,
     autoSignIn: !!options.autoSignIn,
+    capabilities: options.capabilities === undefined ? { ...DEFAULT_CAPABILITIES } : options.capabilities,
   };
+  const mocks = await loadMocks();
   let port = options.port ?? 0;
   let server = null;
   const sockets = new Set();
@@ -303,10 +357,31 @@ export async function startMockServer(options = {}) {
         res.writeHead(200, { 'content-type': 'application/gzip' });
         return res.end('mock');
 
-      default:
+      case 'GET /api/capabilities':
+        return state.capabilities ? send(res, 200, state.capabilities) : send(res, 404, { error: 'not found' });
+
+      case 'GET /editor-sim':
+        return send(res, 200, EDITOR_SIM);
+
+      default: {
+        const ctx = {
+          url,
+          origin: origin(),
+          port,
+          cookies,
+          user,
+          state,
+          send: (status, body, headers) => send(res, status, body, headers),
+          redirect: (location, headers) => redirect(res, location, headers),
+          readBody: () => readBody(req),
+        };
+        for (const mock of mocks) {
+          if (await mock.handle(req, res, ctx)) return undefined;
+        }
         if (req.method === 'GET' && HOSTILE[url.pathname]) return send(res, 200, HOSTILE[url.pathname]);
         if (req.method === 'GET' && !url.pathname.startsWith('/api/')) return send(res, 200, appPage(state));
         return send(res, 404, { error: 'not found' });
+      }
     }
   }
 

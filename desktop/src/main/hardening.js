@@ -13,7 +13,9 @@ import { isProgramFile } from './rules.js';
 
 export const REMOTE_PARTITION = 'persist:laytekz';
 export const UI_PARTITION = 'laytekz-ui';
-export const UI_PRELOAD = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'preload', 'ui.cjs');
+// Galley: V2 desktop shell (WP09): shell feature pages pick their preload from here.
+export const PRELOAD_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'preload');
+export const UI_PRELOAD = path.join(PRELOAD_DIR, 'ui.cjs');
 
 // Copying to the clipboard is all the web UI asks for; it never reads the
 // clipboard or uses the Fullscreen API (View > Enter Full Screen is the window's).
@@ -43,6 +45,22 @@ export function remoteWebPreferences() {
 /** For the app's own local pages (laytekz-ui://), which get a tiny IPC bridge. */
 export function uiWebPreferences() {
   return { ...common(), partition: UI_PARTITION, preload: UI_PRELOAD, spellcheck: false };
+}
+
+/**
+ * Galley: V2 desktop shell (WP09). For a shell feature's local page
+ * (ShellPage): its own partition or the UI session, and its own preload
+ * from src/preload or none at all. Never used for the remote page.
+ */
+export function localWebPreferences(spec = {}) {
+  const prefs = { ...common(), partition: spec.partition ?? UI_PARTITION, spellcheck: false };
+  if (spec.preload) prefs.preload = path.join(PRELOAD_DIR, spec.preload);
+  return prefs;
+}
+
+/** Whether src/preload holds this preload (the shell feature host checks declared pages). */
+export function preloadExists(name) {
+  return /^[a-z0-9-]+\.cjs$/.test(name) && fs.existsSync(path.join(PRELOAD_DIR, name));
 }
 
 function originOf(raw) {
@@ -78,16 +96,19 @@ export function hardenApp() {
 /**
  * The session the Laytekz server runs in.
  * hooks.server() → the current Server; hooks.downloadDone(state, filePath),
- * hooks.downloadBlocked(message) report to the person.
+ * hooks.downloadBlocked(message) report to the person; hooks.vetoed(permission)
+ * (Galley: V2, the shell features' vetoPermissions) refuses one of the
+ * allowed permissions while a feature that needs it refused runs.
  */
 export function hardenRemoteSession(ses, hooks) {
   const ours = (raw) => originOf(raw) === hooks.server().origin;
+  const allowed = (permission) => ALLOWED_PERMISSIONS.has(permission) && !hooks.vetoed?.(permission);
 
   ses.setPermissionRequestHandler((contents, permission, callback, details) => {
-    callback(ALLOWED_PERMISSIONS.has(permission) && ours(details?.requestingUrl ?? contents?.getURL()));
+    callback(allowed(permission) && ours(details?.requestingUrl ?? contents?.getURL()));
   });
   ses.setPermissionCheckHandler((_contents, permission, requestingOrigin) => (
-    ALLOWED_PERMISSIONS.has(permission) && ours(requestingOrigin)
+    allowed(permission) && ours(requestingOrigin)
   ));
   ses.setDevicePermissionHandler(() => false);
 

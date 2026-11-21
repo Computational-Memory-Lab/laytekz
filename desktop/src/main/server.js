@@ -1,7 +1,16 @@
-// The configured Laytekz server: URL validation, origin checks and the health probe.
+// The configured Laytekz server: URL validation, origin checks and the health
+// probe (and, from V2, the capabilities probe).
 
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const PROVIDER_RE = /^[A-Za-z0-9_-]{1,64}$/;
+
+// Galley: V2 desktop shell (WP09). The web app's Desktop settings button
+// goes here (server apps/web/src/settings/types.ts DESKTOP_APP_PATH); the
+// shell opens its own settings window instead of the page.
+export const DESKTOP_SETTINGS_PATH = '/settings/desktop-app';
+// The server's own rules (apps/server/src/util.ts PROJECT_ID_RE, BRANCH_RE).
+const PROJECT_ID_RE = /^[a-z0-9]{4,20}$/;
+const BRANCH_RE = /^[A-Za-z0-9][A-Za-z0-9._/-]{0,80}$/;
 
 export function isLoopbackHost(hostname) {
   return LOOPBACK_HOSTS.has(hostname);
@@ -90,6 +99,29 @@ export class Server {
     const m = /^\/api\/auth\/oauth\/([^/]+)$/.exec(this.localPath(raw) ?? '');
     return m && PROVIDER_RE.test(m[1]) ? m[1] : null;
   }
+
+  // Galley: V2 desktop shell (WP09): the settings-window intercept and the
+  // project a window shows, for the shell features (ShellCtx.projectFromUrl).
+
+  /** <base>/settings/desktop-app, whatever its query or fragment. */
+  isDesktopSettings(raw) {
+    const p = this.localPath(raw);
+    return p === DESKTOP_SETTINGS_PATH || p === `${DESKTOP_SETTINGS_PATH}/`;
+  }
+
+  /** {id, branch} for a project page of this server (<base>/p/<id>[/…][?branch=…]), else null. */
+  projectFromUrl(raw) {
+    const m = /^\/p\/([^/]+)(?:\/.*)?$/.exec(this.localPath(raw) ?? '');
+    if (!m || !PROJECT_ID_RE.test(m[1])) return null;
+    let branch = 'main';
+    try {
+      branch = new URL(raw).searchParams.get('branch') || 'main';
+    } catch {
+      return null;
+    }
+    if (!BRANCH_RE.test(branch) || branch.includes('..')) return null;
+    return { id: m[1], branch };
+  }
 }
 
 const NETWORK_REASONS = [
@@ -148,4 +180,26 @@ export async function checkHealth(ses, baseUrl, timeoutMs = 8000) {
   }
   if (res.status >= 500) return { ok: false, reason: httpReason(res.status) };
   return { ok: false, reason: 'This address does not answer like a Laytekz server (no /api/health).' };
+}
+
+/**
+ * Galley: V2 desktop shell (WP09). GET <base>/api/capabilities, the V2
+ * server's feature list (plan §2.7), without cookies. Resolves to the object,
+ * or null when the server predates it (V1 answers 404) or cannot be reached,
+ * so the shell can fall back to what desktop 1.0 did.
+ */
+export async function fetchCapabilities(ses, baseUrl, timeoutMs = 5000) {
+  try {
+    const res = await ses.fetch(`${baseUrl}/api/capabilities`, {
+      credentials: 'omit',
+      cache: 'no-store',
+      headers: { accept: 'application/json' },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (res.status !== 200) return null;
+    const body = await res.json();
+    return body && typeof body === 'object' && !Array.isArray(body) && typeof body.rev === 'string' ? body : null;
+  } catch {
+    return null;
+  }
 }

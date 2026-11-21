@@ -13,7 +13,7 @@ Google blocks OAuth inside embedded browsers, so the app signs in through the
 
 - Electron 45.4.1, electron-builder 26.18.0, Playwright 1.65.1 (all pinned exactly)
 - Plain JavaScript (ESM main process, CommonJS preload), no bundler and no UI framework
-- No runtime dependencies
+- One runtime dependency, node-pty 1.1.0 (Node-API prebuilds, nothing to rebuild)
 
 ## Layout
 
@@ -40,14 +40,20 @@ desktop/
 │   │   ├── protocol.js      laytekz-ui:// scheme for the local pages
 │   │   ├── ui-bridge.js     the only IPC: local pages ↔ main process
 │   │   ├── external.js      shell.openExternal wrapper (scheme check, test recorder, page budget)
-│   │   └── settings.js      settings.json in the profile folder
+│   │   ├── settings.js      settings.json in the profile folder
+│   │   └── features/        V2 shell features: index.js (the list), host.js (ShellCtx, menu items, pages, IPC), <id>/
+│   │       └── console/     the console: panel, sessions, IPC, shell environment, pty-host.js (utility process)
+│   │           agents.js, tokens.js  ▶ Claude Code / ▶ Codex: detection, consent, the project token, mcp.json in userData
 │   ├── preload/ui.cjs       preload for local pages only (never for the remote page)
+│   ├── preload/console.cjs  the console pages' bridge (window.laytekzConsole)
 │   └── ui/                  local pages: offline, toast, change-server (+ ui.css)
+│       └── console*.{html,js,css}  the console page, its settings page, vendored xterm.js (npm run vendor:xterm)
 ├── tests/
 │   ├── mock-server.mjs      stand-in Laytekz server implementing the handoff contract
 │   ├── browser-sim.mjs      plays the system browser (follows redirects with cookies)
 │   ├── helpers.mjs          launches the app under Playwright in test mode
-│   ├── *.spec.mjs           Playwright tests (unit, signin, navigation, offline, shell, hardening)
+│   ├── mocks/               server mocks per shell feature (<id>.mjs); _probe-feature.mjs is the test-only feature
+│   ├── *.spec.mjs           Playwright tests (unit, signin, navigation, offline, shell, hardening, console, agents)
 │   └── smoke-packaged.mjs   end-to-end check of the packaged .app
 └── release/                 release installers (git-ignored except INSTALL.md), see Release builds
     ├── Laytekz-<version>-mac-{arm64,x64}.{dmg,zip}, Laytekz-<version>-win-{x64,arm64}-setup.exe
@@ -65,7 +71,8 @@ npm start
 
 Node 22 or later. `npm start` runs `electron .` against the configured server.
 To work against a local server, use **Laytekz → Change Server…** (Windows:
-**File → Change Server…**) and enter `http://localhost:3000`; plain `http://` is
+**File → Change Server…**; neither has a shortcut now, since Cmd/Ctrl+, is
+**Settings…**) and enter `http://localhost:3000`; plain `http://` is
 accepted only for `localhost`, `127.0.0.1` and `[::1]`.
 
 If Electron starts as plain Node (`bad option: --remote-debugging-port`, or no
@@ -84,7 +91,7 @@ npm run pack:mac && npm run test:packaged   # end-to-end check of the packaged .
 [Package](#package)). To check a release build instead, test a copy of it:
 see [Release builds](#release-builds).
 
-`npm test` runs 60 tests in about 35 seconds. Each test starts its
+`npm test` runs 92 tests. Each test starts its
 own mock server (`tests/mock-server.mjs`) on a random port and its own app
 instance with a throwaway profile. Nothing opens a browser: test mode records
 `shell.openExternal` calls to a file and `tests/browser-sim.mjs` plays the
@@ -116,7 +123,15 @@ browser. Areas covered:
 - **Shell:** Change Server validation and persistence, menu contents and
   accelerator conflicts (modifiers compared as sets), the About text and its
   links, remembered window bounds, the unload guard, and the single-instance
-  lock.
+  lock. Also Settings… (Cmd/Ctrl+,) and the open-settings event, the
+  `/settings/desktop-app` intercept, the user-agent token, a cancelled context
+  menu against the spelling menu, and the shell feature host (the probe
+  feature, plus unit tests without Electron).
+- **Console:** View → Console, a command's output, resize, pop-out and dock,
+  no network in the console page, the quit question and the off switch
+  (`tests/console.spec.mjs`).
+- **Agents:** fake claude and codex see the token only in their environment,
+  the install card, MCP off (`tests/agents.spec.mjs`).
 - **Hardening:** what a hostile page or a launcher can do: command-line
   switches (refused before the DevTools server starts), `window.open`
   features, the window cap, a project window outliving the main window with
@@ -148,6 +163,10 @@ Test mode is for automated runs only. Turn it on with `LAYTEKZ_TEST_MODE=1`.
 | `LAYTEKZ_TEST_RECORD=/abs/file.jsonl` | Where openExternal calls are recorded (default: `<profile>/open-external.jsonl`) | yes |
 | `LAYTEKZ_TEST_SERVER_URL=http://127.0.0.1:PORT` | Server to load, instead of settings.json or the default | **ignored** |
 | `LAYTEKZ_TEST_SIGNIN_TIMEOUT_MS=1500` | Sign-in timeout (default 5 minutes) | **ignored** |
+| `LAYTEKZ_TEST_SHELL_FEATURES=/abs/file.mjs` | Extra shell features (default export: an array) appended to the shipped ones | **ignored** |
+| `LAYTEKZ_TEST_CONSOLE_QUIT=cancel` | The console's quit question answers Cancel (default Quit); the question goes to `console-quit.jsonl` in the profile | **ignored** |
+| `LAYTEKZ_TEST_AGENT_BIN=/abs/dir` | The agent buttons look for claude and codex only in this folder | **ignored** |
+| `LAYTEKZ_TEST_AGENT_CONSENT=always\|cancel` | The agent consent question's answer (default Allow); questions go to `agent-consent.jsonl` | **ignored** |
 | `LAYTEKZ_TEST_RETRY_MS=300` | Base delay of the offline retry backoff (default 2 s, capped at 60 s) | **ignored** |
 | `LAYTEKZ_TEST_SIGNIN_DEBOUNCE_MS=300` | How long a waiting sign-in ignores another start (default 10 s) | **ignored** |
 | `LAYTEKZ_TEST_SWITCH_GUARD=1` | Turns on, from source, the command-line switch check a packaged build always runs | not needed (always on) |
@@ -183,7 +202,7 @@ build needs about 265 MB (macOS) or 360 MB (Windows) next to its installers,
 and every installer is 105 to 127 MB.
 
 ```sh
-env -u ELECTRON_RUN_AS_NODE npm test    # 60 tests; do not package a red tree
+env -u ELECTRON_RUN_AS_NODE npm test    # 76 tests; do not package a red tree
 
 # release/Laytekz-<v>-mac-arm64.{dmg,zip}; keeps release/mac-arm64/Laytekz.app
 env -u ELECTRON_RUN_AS_NODE npx electron-builder --mac dmg:arm64 zip:arm64 -c.directories.output=release
@@ -400,11 +419,11 @@ Remote content is treated as untrusted with respect to the OS.
   the connected server, the credit "Based on Aldine" with the upstream link
   `https://github.com/trahloff/Aldine`, the AGPL note with the server's
   source link `<server>/source`, the privacy page `<server>/privacy`, and
-  buttons for both), Change Server… (⌘,), Services, Hide Laytekz and Quit
+  buttons for both), Settings… (⌘,), Change Server…, Services, Hide Laytekz and Quit
   Laytekz. Then come Edit (standard roles), View (Reload, Force Reload,
   Developer Tools, zoom, full screen), Window, and Help (Laytekz Website,
-  server source, Privacy). On Windows, File holds Change Server
-  (Ctrl+,) and Exit, and Help holds About Laytekz.
+  server source, Privacy). On Windows, File holds Settings… (Ctrl+,),
+  Change Server and Exit, and Help holds About Laytekz.
 - **Shortcuts:** the web UI owns ⌘/Ctrl + S, K, J, F, G, D, B, I, /, [, ],
   Enter, ⇧M, ⇧F, ⇧K, ⇧G and ⌥G, plus Shift+Alt+F, and CodeMirror takes Ctrl+M
   on Windows. No menu accelerator uses any of them (a test checks this). On

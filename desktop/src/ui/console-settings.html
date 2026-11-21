@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laytekz – Console Settings</title>
+  <link rel="stylesheet" href="console-settings.css">
+</head>
+<body data-testid="console-settings-page">
+  <h1>Console</h1>
+  <p class="hint">A terminal inside Laytekz, on this computer. Open it with View → Console or Ctrl+`.</p>
+  <form id="form" autocomplete="off">
+    <label class="row">
+      <input type="checkbox" name="enabled" data-testid="console-setting-enabled">
+      <span>Turn on the console</span>
+    </label>
+    <p class="hint indent">Turning it off closes every terminal and hides the menu item.</p>
+    <label class="row">
+      <input type="checkbox" name="agents" data-testid="console-setting-agents">
+      <span>Show the Claude Code and Codex buttons</span>
+    </label>
+    <p class="hint indent">They start the agent on the project in the main window, editing it through Laytekz.</p>
+    <label class="field">
+      <span>Shell</span>
+      <input type="text" name="shell" data-testid="console-setting-shell" placeholder="Your login shell" spellcheck="false">
+    </label>
+    <p class="hint">A path, with arguments if needed. New terminals use it.</p>
+    <label class="field">
+      <span>Font size</span>
+      <input type="number" name="fontSize" min="8" max="32" step="1" data-testid="console-setting-font-size">
+    </label>
+    <label class="field">
+      <span>Lines kept for scrolling back</span>
+      <input type="number" name="scrollback" min="100" max="100000" step="100" data-testid="console-setting-scrollback">
+    </label>
+    <label class="field">
+      <span>Cursor</span>
+      <select name="cursorStyle" data-testid="console-setting-cursor">
+        <option value="block">Block</option>
+        <option value="bar">Bar</option>
+        <option value="underline">Underline</option>
+      </select>
+    </label>
+  </form>
+  <script src="console-settings.js"></script>
+</body>
+</html>

@@ -1,5 +1,8 @@
 // The only IPC in the app: local laytekz-ui:// pages ask for their state and
 // report button presses. Remote pages have no preload and cannot reach this.
+// Galley: V2 desktop shell (WP09): a shell feature's page on the shared
+// preload (ui.cjs) is answered by that feature (features/host.js, through
+// `fallback`); a feature's own channels go through the host, never here.
 
 import { ipcMain } from 'electron';
 import { UI_ORIGIN } from './protocol.js';
@@ -13,13 +16,24 @@ function handlerFor(event) {
   return handler;
 }
 
-export function installUiBridge() {
-  ipcMain.handle('ui:get-state', (event) => handlerFor(event)?.state() ?? null);
-  ipcMain.handle('ui:action', (event, name, payload) => {
+/** opts.fallback(channel, event, args): a page with no handler here (the host checks the sender itself). */
+export function installUiBridge(opts = {}) {
+  const fallback = (channel, event, args) => opts.fallback?.(channel, event, args) ?? null;
+  ipcMain.handle('ui:get-state', (event) => {
     const handler = handlerFor(event);
-    if (!handler || typeof name !== 'string') return null;
-    return handler.action(name, payload);
+    return handler ? handler.state() ?? null : fallback('ui:get-state', event, []);
   });
+  ipcMain.handle('ui:action', (event, name, payload) => {
+    if (typeof name !== 'string') return null;
+    const handler = handlerFor(event);
+    return handler ? handler.action(name, payload) : fallback('ui:action', event, [name, payload]);
+  });
+}
+
+/** Local pages never go anywhere else. */
+export function lockLocalContents(contents) {
+  contents.on('will-navigate', (event) => event.preventDefault());
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
 }
 
 /** handler = {state: () => object, action: (name, payload) => any}. */
@@ -27,9 +41,7 @@ export function bindUi(contents, handler) {
   const id = contents.id;
   handlers.set(id, handler);
   contents.once('destroyed', () => handlers.delete(id));
-  // Local pages never go anywhere else.
-  contents.on('will-navigate', (event) => event.preventDefault());
-  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  lockLocalContents(contents);
 }
 
 export function pushUiState(contents, state) {

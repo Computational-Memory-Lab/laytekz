@@ -1,0 +1,153 @@
+/* The console page (V2, WP17). It follows the system's light or dark setting. */
+:root {
+  color-scheme: light dark;
+  --c-bg: #ffffff;
+  --c-bar: #f2f2f4;
+  --c-line: #d9d9de;
+  --c-text: #1c1c1e;
+  --c-text-2: #5f5f66;
+  --c-hover: #e6e6ea;
+  --c-active: #ffffff;
+  --c-accent: #3478f6;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #1c1c1e;
+    --c-bar: #2a2a2d;
+    --c-line: #3a3a3e;
+    --c-text: #ececf0;
+    --c-text-2: #a1a1a8;
+    --c-hover: #36363a;
+    --c-active: #1c1c1e;
+    --c-accent: #5b9bff;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: 12px/1.3 var(--font-ui);
+  border-top: 1px solid var(--c-line);
+}
+body.is-window { border-top: 0; }
+
+.console-grip {
+  height: 5px;
+  margin-top: -1px;
+  cursor: ns-resize;
+  flex: none;
+}
+.console-grip:hover, .console-grip.is-dragging { background: var(--c-accent); }
+body.is-window .console-grip { display: none; }
+
+.console-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px 0 4px;
+  height: 30px;
+  flex: none;
+  background: var(--c-bar);
+  border-bottom: 1px solid var(--c-line);
+  user-select: none;
+}
+.console-tabs { display: flex; gap: 2px; overflow-x: auto; min-width: 0; scrollbar-width: none; }
+.console-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 4px 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c-text-2);
+  font: inherit;
+  white-space: nowrap;
+  cursor: default;
+}
+.console-tab:hover { background: var(--c-hover); }
+.console-tab[aria-selected="true"] { background: var(--c-active); color: var(--c-text); border-color: var(--c-line); }
+.console-tab.is-exited .console-tab-name { text-decoration: line-through; opacity: 0.7; }
+.console-tab-close {
+  width: 18px; height: 18px;
+  border: 0; border-radius: 4px;
+  background: transparent; color: inherit;
+  font: 14px/18px var(--font-ui);
+  padding: 0;
+}
+.console-tab-close:hover { background: var(--c-hover); }
+.console-spacer { flex: 1; }
+.console-icon, .console-text {
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c-text-2);
+  font: inherit;
+}
+.console-icon { width: 24px; font-size: 16px; line-height: 24px; padding: 0; }
+.console-text { padding: 0 8px; }
+.console-icon:hover, .console-text:hover { background: var(--c-hover); color: var(--c-text); }
+button:focus-visible { outline: 2px solid var(--c-accent); outline-offset: -2px; }
+body.is-window [data-testid="console-popout"],
+body:not(.is-window) [data-testid="console-dock"] { display: none; }
+
+.console-terms { position: relative; flex: 1; min-height: 0; }
+.console-term { position: absolute; inset: 4px 0 0 8px; }
+.console-term[hidden] { display: none; }
+.console-off { margin: 16px; color: var(--c-text-2); }
+
+/* The agent buttons and their card (V2, WP25). */
+.console-agents { display: flex; gap: 2px; margin-left: 6px; padding-left: 6px; border-left: 1px solid var(--c-line); }
+.console-agents[hidden] { display: none; }
+.console-agent {
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--c-text-2);
+  font: inherit;
+  white-space: nowrap;
+}
+.console-agent:hover { background: var(--c-hover); color: var(--c-text); }
+.console-agent[aria-disabled="true"] { opacity: 0.55; }
+.console-agent.is-busy { opacity: 0.55; pointer-events: none; }
+.console-card {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex: none;
+  padding: 8px 8px 8px 12px;
+  background: var(--c-bar);
+  border-bottom: 1px solid var(--c-line);
+  max-height: 45%;
+  overflow: auto;
+}
+.console-card[hidden] { display: none; }
+.console-card-body { flex: 1; min-width: 0; }
+.console-card p { margin: 0 0 4px; }
+.console-card-title { font-weight: 600; }
+.console-card-title:empty { display: none; }
+.console-card-text { color: var(--c-text-2); }
+.console-card-commands { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; }
+.console-card-commands li { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.console-card-commands code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 3px 6px;
+  border: 1px solid var(--c-line);
+  border-radius: 4px;
+  background: var(--c-bg);
+  font: 12px/1.4 "SF Mono", Menlo, Consolas, monospace;
+  user-select: text;
+}
+.console-card-actions { display: flex; gap: 4px; align-items: center; flex: none; }

@@ -26,7 +26,13 @@ const appWindows = new Set();
  *   mainWindow(): BrowserWindow | null,
  *   childOptions(): BrowserWindowConstructorOptions,   // for same-origin popups
  *   decorate(win): void,                                // context menu and unload guard for popups
+ *   openDesktopSettings(): void,                        // Galley: V2 (WP09), <base>/settings/desktop-app
  * }
+ *
+ * Galley: V2 desktop shell (WP09). <base>/settings/desktop-app (the web
+ * app's Desktop settings button, opened with window.open or a navigation,
+ * any query or fragment) never loads: the shell opens its own settings
+ * window instead and tells the page nothing.
  */
 export function applyAppPolicy(win, ctx) {
   const contents = win.webContents;
@@ -52,6 +58,11 @@ export function applyAppPolicy(win, ctx) {
     const provider = server.signInProvider(url);
     if (provider) {
       ctx.signIn(provider);
+      return { action: 'deny' };
+    }
+    // Galley: V2 (WP09): the desktop settings window, not a popup.
+    if (server.isDesktopSettings(url)) {
+      ctx.openDesktopSettings();
       return { action: 'deny' };
     }
     if (server.owns(url)) {
@@ -84,6 +95,11 @@ function decide(ctx, url, chainStart, win) {
     ctx.signIn(provider);
     return 'handled';
   }
+  // Galley: V2 (WP09): the desktop settings window, not the page.
+  if (server.isDesktopSettings(url)) {
+    ctx.openDesktopSettings();
+    return 'handled';
+  }
   if (server.owns(url)) return 'allow';
   if (chainStart && server.isApi(chainStart) && isWeb(url)) {
     // Sign-in chains (<base>/api/auth/...) never run embedded: the provider's
@@ -104,6 +120,11 @@ export function loadInWindow(ctx, win, url) {
   const provider = ctx.server().signInProvider(url);
   if (provider) {
     ctx.signIn(provider);
+    return;
+  }
+  // Galley: V2 (WP09): the desktop settings window, not the page.
+  if (ctx.server().isDesktopSettings(url)) {
+    ctx.openDesktopSettings();
     return;
   }
   win.loadURL(url).catch(() => {

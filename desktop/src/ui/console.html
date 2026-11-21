@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laytekz – Console</title>
+  <link rel="stylesheet" href="console-xterm.css">
+  <link rel="stylesheet" href="console.css">
+</head>
+<body data-testid="console-page">
+  <div class="console-grip" data-testid="console-resize" title="Drag to resize"></div>
+  <header class="console-bar">
+    <div class="console-tabs" role="tablist" aria-label="Terminals" data-testid="console-tabs"></div>
+    <button type="button" class="console-icon" data-testid="console-new-tab" title="New terminal" aria-label="New terminal">+</button>
+    <div class="console-agents" data-testid="console-agents">
+      <button type="button" class="console-agent" data-testid="console-agent-claude" data-kind="claude" title="Start Claude Code on this project">▶ Claude Code</button>
+      <button type="button" class="console-agent" data-testid="console-agent-codex" data-kind="codex" title="Start Codex on this project">▶ Codex</button>
+    </div>
+    <div class="console-spacer"></div>
+    <button type="button" class="console-text" data-testid="console-popout" title="Open the console in its own window">Pop out</button>
+    <button type="button" class="console-text" data-testid="console-dock" title="Put the console back in the main window">Dock</button>
+    <button type="button" class="console-text" data-testid="console-settings" title="Console settings">Settings</button>
+    <button type="button" class="console-icon" data-testid="console-hide" title="Hide the console (Ctrl+`)" aria-label="Hide the console">×</button>
+  </header>
+  <section class="console-card" data-testid="console-agent-card" role="status" hidden>
+    <div class="console-card-body">
+      <p class="console-card-title" data-testid="console-agent-card-title"></p>
+      <p class="console-card-text" data-testid="console-agent-card-text"></p>
+      <ul class="console-card-commands" data-testid="console-agent-card-commands"></ul>
+    </div>
+    <div class="console-card-actions">
+      <button type="button" class="console-text" data-testid="console-agent-check" hidden>Check again</button>
+      <button type="button" class="console-icon" data-testid="console-agent-card-close" title="Dismiss" aria-label="Dismiss">×</button>
+    </div>
+  </section>
+  <main class="console-terms" data-testid="console-terminals"></main>
+  <p class="console-off" data-testid="console-off" hidden>The console is turned off. Turn it on in Console settings.</p>
+  <script src="console-xterm.js"></script>
+  <script src="console-xterm-addon-fit.js"></script>
+  <script src="console-xterm-addon-web-links.js"></script>
+  <script src="console.js"></script>
+</body>
+</html>

@@ -13,7 +13,21 @@ files:
   - src/**/*
   - "!**/*.map"
   - "!**/.DS_Store"
+  # Galley: V2 console (WP17): node-pty, the one runtime dependency (production
+  # node_modules are added automatically). Only its JavaScript and prebuilds
+  # ship; build/after-pack.cjs keeps the target's prebuild only.
+  - "!node_modules/node-pty/{src,deps,third_party,scripts,typings,build}/**"
+  - "!node_modules/node-pty/binding.gyp"
+  - "!node_modules/node-pty/lib/**/*.test.js"
+  - "!**/*.pdb"
 asar: true
+# Galley: V2 console (WP17): native code loads from real files, never from the asar.
+asarUnpack:
+  - node_modules/node-pty/**
+# node-pty uses Node-API prebuilds: nothing to rebuild for Electron, so cross-builds need no compiler.
+npmRebuild: false
+# spawn-helper's execute bit, and a check that the target's prebuild is there.
+afterPack: build/after-pack.cjs
 publish: null
 
 # Electron fuses for a shell that loads remote content.

@@ -131,8 +131,17 @@ case "${1:-}" in
     else
       say "   package-lock.json unchanged: npm ci skipped"
     fi
+    # The build id shown in the app and used by its "updated, reload" notice.
+    export ALDINE_BUILD_REV="$(cat .galley-rev 2>/dev/null || date -u +%Y%m%d%H%M)"
     { npm run build -w apps/web && npm run build -w apps/server; } >> "$blog" 2>&1 || { tail -n 40 "$blog"; fail "build failed"; }
     built "$dir" || fail "build finished but its output is incomplete"
+    # Tabs opened before this deploy can still load the previous build's lazy
+    # chunks: copy that build's own asset files (one release back, not more).
+    ls "$dir/apps/web/dist/assets" > "$dir/.galley-fresh-assets"
+    live_dir="$(readlink -f "$GALLEY_CODE")"
+    if [[ "$live_dir" != "$dir" && -f "$live_dir/.galley-fresh-assets" ]]; then
+      rsync -a --ignore-existing --files-from="$live_dir/.galley-fresh-assets" "$live_dir/apps/web/dist/assets/" "$dir/apps/web/dist/assets/" || true
+    fi
     say "   built Laytekz, based on Aldine $(code_version "$dir") (web bundle, server, PDF viewer)"
     "$GALLEY_BIN/libexec/make-source-tarball.sh" "$dir" --no-serve | sed 's/^/   /'
 

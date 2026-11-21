@@ -19,8 +19,28 @@ server, and a desktop app for macOS and Windows that connects to it.
 - **Two ways to write.** Plain LaTeX source, or a visual mode that renders
   headings, maths and tables in place while leaving the source untouched.
 - **References.** Search for a paper by title, DOI or arXiv ID and add its
-  BibTeX entry, or keep a `.bib` file in step with a Zotero library.
-- **Sign in with Google.** New accounts wait for an administrator's approval.
+  BibTeX entry, keep a `.bib` file in step with a Zotero or Mendeley library,
+  or link a `.bib` file on your computer (desktop app). Pickers for citations
+  and cross-references insert the right command for your packages.
+- **Writing help.** Brackets, `$…$` and environments close themselves, `&` and
+  `%` are escaped where you mean them literally, maths previews exactly as it
+  will typeset when you hover it, tables get a grid picker and tidy columns,
+  and built-in commands format statistics (p values, Bayes factors and more).
+  Optional grey suggestions complete the sentence with Tab, from the
+  document's own words or a small model that runs on your computer.
+- **Word counts** that leave out tables, references and supplementary
+  material, with rules you can edit.
+- **Comments anywhere.** Select text in the PDF and comment on it; the comment
+  shows on the matching source. A separate highlighter marks source lines in
+  colours of your choosing.
+- **Import a ZIP or a folder**, and rename a project's main file without
+  touching its PDF, bibliography and build files.
+- **Console and AI agents** (desktop app). A terminal tab beside the editor,
+  with buttons that start Claude Code or Codex on the open project.
+- **Settings** for appearance (light, dark or match the system), fonts and
+  editor behaviour, and an optional desk pet.
+- **Sign in with Google.** New accounts wait for an administrator's approval,
+  unless their address is on the administrator's approved list.
 - **Sandboxed typesetting.** Each compile runs confined to its own project.
 
 ## Get the desktop app

@@ -1,0 +1,98 @@
+/* Desktop app settings (V2, WP41). Follows the system's light or dark setting. */
+:root {
+  color-scheme: light dark;
+  --c-bg: #f5f5f7;
+  --c-text: #1c1c1e;
+  --c-text-2: #6b6b72;
+  --c-field: #ffffff;
+  --c-line: #d1d1d6;
+  --c-accent: #3478f6;
+  --c-on-accent: #ffffff;
+  --c-error: #c9342b;
+  --c-ok: #24803c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #1c1c1e;
+    --c-text: #ececf0;
+    --c-text-2: #a1a1a8;
+    --c-field: #2a2a2d;
+    --c-line: #3a3a3e;
+    --c-accent: #5b9bff;
+    --c-error: #ff7b72;
+    --c-ok: #5fd07a;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  padding: 20px 24px 32px;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+h1 { font-size: 17px; margin: 0 0 4px; }
+h2 { font-size: 14px; margin: 0 0 8px; }
+section { border-top: 1px solid var(--c-line); padding: 14px 0 6px; margin-top: 10px; scroll-margin-top: 8px; }
+section.flash { animation: flash 1.2s ease-out; }
+@keyframes flash { from { background: color-mix(in srgb, var(--c-accent) 14%, transparent); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { section.flash { animation: none; } }
+[hidden] { display: none !important; }
+.hint { color: var(--c-text-2); margin: 4px 0 8px; font-size: 12px; overflow-wrap: anywhere; }
+.hint.error { color: var(--c-error); }
+.hint.ok { color: var(--c-ok); }
+.indent { margin-left: 24px; }
+.label { margin: 12px 0 0; font-weight: 500; }
+.row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.field { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 12px; }
+.inline { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.inline input { flex: 1; }
+label[for] { font-weight: 500; }
+input[type="text"], select {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--c-line);
+  border-radius: 6px;
+  background: var(--c-field);
+  color: var(--c-text);
+  font: inherit;
+  min-width: 0;
+}
+select { width: 140px; }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+button {
+  font: inherit;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 6px;
+  background: var(--c-field);
+  color: var(--c-text);
+  white-space: nowrap;
+}
+button:disabled { opacity: 0.5; }
+button.primary { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-on-accent); }
+button.link { background: none; border-color: transparent; color: var(--c-accent); padding: 0 4px; }
+.checklist {
+  max-height: 160px;
+  overflow: auto;
+  border: 1px solid var(--c-line);
+  border-radius: 6px;
+  background: var(--c-field);
+  padding: 4px 10px 8px;
+}
+.links { list-style: none; margin: 0; padding: 0; }
+.links li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--c-line);
+}
+.links li:last-child { border-bottom: none; }
+.links .name { font-weight: 500; overflow-wrap: anywhere; }
+.links .where, .links .status { grid-column: 1; color: var(--c-text-2); font-size: 12px; overflow-wrap: anywhere; }
+.links .status.error { color: var(--c-error); }
+.links .actions { grid-column: 2; grid-row: 1 / span 3; display: flex; gap: 6px; align-items: center; }

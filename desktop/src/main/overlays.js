@@ -1,11 +1,12 @@
-// Local pages laid over the main window: the offline screen and a small toast.
-// They are separate WebContentsViews, so the remote page never gets a preload.
+// Local pages laid over the main window: the offline screen and a small toast
+// (and, Galley: V2, a shell feature's page, FeatureOverlay). They are
+// separate WebContentsViews, so the remote page never gets a preload.
 
 import { WebContentsView } from 'electron';
 import { BACKGROUND } from './env.js';
-import { uiWebPreferences } from './hardening.js';
+import { localWebPreferences, uiWebPreferences } from './hardening.js';
 import { uiUrl } from './protocol.js';
-import { bindUi, pushUiState } from './ui-bridge.js';
+import { bindUi, lockLocalContents, pushUiState } from './ui-bridge.js';
 
 class Overlay {
   constructor(win, page, background) {
@@ -17,6 +18,13 @@ class Overlay {
     this.shown = false;
     win.on('resize', () => this.layout());
     win.on('closed', () => this.destroy());
+  }
+
+  /** Galley: V2 (WP09): the view's web preferences and what it is wired to; FeatureOverlay changes both. */
+  createView() {
+    const view = new WebContentsView({ webPreferences: uiWebPreferences() });
+    bindUi(view.webContents, { state: () => this.state, action: (n, p) => this.handle(n, p) });
+    return view;
   }
 
   /** Subclasses: where the view sits inside a content area of width × height. */
@@ -39,9 +47,8 @@ class Overlay {
     if (this.win.isDestroyed()) return;
     this.state = state;
     if (!this.view) {
-      this.view = new WebContentsView({ webPreferences: uiWebPreferences() });
+      this.view = this.createView();
       this.view.setBackgroundColor(this.background);
-      bindUi(this.view.webContents, { state: () => this.state, action: (n, p) => this.handle(n, p) });
       this.view.webContents.loadURL(uiUrl(this.page));
     }
     // Adding a view that is already a child moves it to the top.
@@ -71,6 +78,68 @@ class Overlay {
     if (this.view && !this.view.webContents.isDestroyed()) this.view.webContents.close();
     this.view = null;
     this.shown = false;
+  }
+}
+
+/**
+ * Galley: V2 desktop shell (WP09). A shell feature's page laid over the main
+ * window (ShellCtx.overlay): its own partition and preload (ShellPage), no
+ * ui-bridge handler of its own (the feature answers through the host), and
+ * the bounds the feature chooses. `onContents(webContents)` runs once the
+ * view exists, so the host knows the sender; `raised()` runs after each
+ * show, so the toast stays on top.
+ */
+export class FeatureOverlay extends Overlay {
+  constructor(win, page, spec, { bounds = null, background = null, onContents = null, raised = null } = {}) {
+    super(win, page, background ?? BACKGROUND);
+    this.spec = spec;
+    this.boundsFn = bounds;
+    this.onContents = onContents;
+    this.raised = raised;
+  }
+
+  createView() {
+    const view = new WebContentsView({ webPreferences: localWebPreferences(this.spec) });
+    lockLocalContents(view.webContents);
+    this.onContents?.(view.webContents);
+    return view;
+  }
+
+  bounds(width, height) {
+    const b = this.boundsFn?.(width, height);
+    if (b && [b.x, b.y, b.width, b.height].every(Number.isFinite)) {
+      return { x: Math.round(b.x), y: Math.round(b.y), width: Math.max(0, Math.round(b.width)), height: Math.max(0, Math.round(b.height)) };
+    }
+    return super.bounds(width, height);
+  }
+
+  show(state = null) {
+    super.show(state);
+    this.raised?.();
+  }
+
+  destroy() {
+    if (this.shown && this.view && !this.win.isDestroyed()) this.win.contentView.removeChildView(this.view);
+    super.destroy();
+  }
+
+  /** What a feature gets back from ShellCtx.overlay: {show, hide, raise, layout, destroy, visible, contents, view, window}. */
+  api() {
+    const o = this;
+    return Object.freeze({
+      show: () => o.show(),
+      hide: () => o.hide(),
+      raise: () => {
+        o.raise();
+        o.raised?.();
+      },
+      layout: () => o.layout(),
+      destroy: () => o.destroy(),
+      get visible() { return o.visible; },
+      get contents() { return o.contents; },
+      get view() { return o.view; },
+      get window() { return o.win; },
+    });
   }
 }
 

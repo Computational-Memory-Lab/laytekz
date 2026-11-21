@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Laytekz – Desktop App Settings</title>
+  <link rel="stylesheet" href="desktop-settings.css">
+</head>
+<body data-testid="desktop-settings-page">
+  <h1>Desktop app</h1>
+  <p class="hint">These settings belong to the Laytekz app on this computer. Editor and account settings are under Settings… in the menu.</p>
+
+  <section id="server" data-testid="desktop-settings-server">
+    <h2>Server</h2>
+    <form id="server-form" novalidate>
+      <label for="server-url">Server address</label>
+      <div class="inline">
+        <input id="server-url" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://latex.example.com" data-testid="desktop-server-url">
+        <button type="button" id="server-default" class="link" data-testid="desktop-server-default">Use default</button>
+        <button type="submit" id="server-save" class="primary" data-testid="desktop-server-save">Connect</button>
+      </div>
+      <p id="server-message" class="hint" role="status" aria-live="polite" data-testid="desktop-server-message"></p>
+    </form>
+  </section>
+
+  <section id="startup" data-testid="desktop-settings-startup">
+    <h2>Starting up</h2>
+    <label class="row" id="login-row">
+      <input type="checkbox" id="open-at-login" data-testid="desktop-open-at-login">
+      <span>Open Laytekz when I log in</span>
+    </label>
+    <p id="login-hint" class="hint indent" hidden>Takes effect in the installed app.</p>
+    <p class="label">When Laytekz opens</p>
+    <label class="row">
+      <input type="radio" name="launch" value="list" data-testid="desktop-launch-list">
+      <span>Show the project list</span>
+    </label>
+    <label class="row">
+      <input type="radio" name="launch" value="last" data-testid="desktop-launch-last">
+      <span>Reopen the last project</span>
+    </label>
+    <p id="launch-hint" class="hint indent" data-testid="desktop-launch-hint"></p>
+  </section>
+
+  <section id="zoom" data-testid="desktop-settings-zoom">
+    <h2>Page zoom</h2>
+    <label class="field">
+      <span>Zoom</span>
+      <select id="zoom-select" data-testid="desktop-zoom"></select>
+    </label>
+    <p class="hint">Kept across reloads and launches. View → Zoom In and Zoom Out change it too.</p>
+  </section>
+
+  <section id="spelling" data-testid="desktop-settings-spelling">
+    <h2>Spelling</h2>
+    <p id="spelling-mac" class="hint" hidden>macOS checks spelling in the languages set in System Settings → Keyboard → Text Input.</p>
+    <div id="spelling-list" class="checklist" data-testid="desktop-spelling-list" hidden></div>
+    <p id="spelling-hint" class="hint" hidden>Choose up to 8. With none chosen, Laytekz uses your system's language.</p>
+  </section>
+
+  <section id="bib" data-testid="desktop-settings-bib">
+    <h2>Linked .bib files</h2>
+    <p class="hint">Files on this computer that Laytekz uploads to a project each time you save them, while the app is open. Link one with File → Link a local .bib… while a project is open.</p>
+    <ul id="bib-list" class="links" data-testid="desktop-bib-list"></ul>
+    <p id="bib-empty" class="hint empty" data-testid="desktop-bib-empty" hidden>No files are linked.</p>
+    <p id="bib-message" class="hint" role="status" aria-live="polite" data-testid="desktop-bib-message"></p>
+  </section>
+
+  <script src="desktop-settings.js"></script>
+</body>
+</html>
