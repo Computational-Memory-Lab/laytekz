@@ -3,7 +3,7 @@
 Laytekz is a LaTeX editor you share with other people: you write, the PDF
 updates as you go, and collaborators can edit the same document at the same
 time. This app opens a Laytekz server in its own window: by default the one at
-<https://latex.devon7y.com>, or another server you choose with **Change
+<https://laytekz.devon7y.com>, or another server you choose with **Change
 Server…** in the app's menu.
 
 ## Which file do I need?

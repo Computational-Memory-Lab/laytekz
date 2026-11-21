@@ -191,7 +191,7 @@ test('the menu has About, Settings, Change server and Help, and no accelerator s
       return captured;
     });
     expect(about.message).toBe('Laytekz');
-    expect(about.detail).toContain('Version 1.0.0');
+    expect(about.detail).toContain('Version 1.0.1');
     expect(about.detail).toContain('Based on Aldine: https://github.com/trahloff/Aldine');
     expect(about.detail).toContain(`licensed under the AGPL-3.0. Its source code: ${mock.url}/source`);
     expect(about.detail).toContain(`Privacy: ${mock.url}/privacy`);
@@ -201,7 +201,7 @@ test('the menu has About, Settings, Change server and Help, and no accelerator s
     await expect.poll(() => ctx.recorded()).toContain(`${mock.url}/privacy`);
 
     await ctx.app.evaluate(({ Menu }) => Menu.getApplicationMenu().getMenuItemById('help-site').click());
-    await expect.poll(() => ctx.recorded()).toContain('https://latex.devon7y.com/');
+    await expect.poll(() => ctx.recorded()).toContain('https://laytekz.devon7y.com/');
   } finally {
     await ctx.close();
     await mock.close();
@@ -717,7 +717,7 @@ test.describe('shell feature host (no Electron)', () => {
   test('the user-agent token is appended once, with a clean version', () => {
     const base = 'Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/140.0 Electron/45.4.1 Safari/537.36';
     expect(withDesktopToken(base, '2.0.0')).toBe(`${base} ${DESKTOP_UA_TOKEN}/2.0.0`);
-    expect(withDesktopToken(`${base} Laytekz-Desktop/1.0.0`, '2.0.0')).toBe(`${base} Laytekz-Desktop/2.0.0`);
+    expect(withDesktopToken(`${base} Laytekz-Desktop/1.0.1`, '2.0.0')).toBe(`${base} Laytekz-Desktop/2.0.0`);
     expect(withDesktopToken(base, '2.0.0 evil/1')).toBe(`${base} Laytekz-Desktop/0`);
   });
 

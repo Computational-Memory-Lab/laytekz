@@ -2,7 +2,7 @@
 
 The Laytekz desktop app for macOS and Windows. It is a thin, hardened Electron
 shell around the Laytekz web app (based on [Aldine](https://github.com/trahloff/Aldine)).
-The main window loads the remote server (default `https://latex.devon7y.com`)
+The main window loads the remote server (default `https://laytekz.devon7y.com`)
 in a persistent session, so the web UI runs unmodified: its relative API calls,
 its collaboration WebSocket and its HttpOnly session cookie all work as they do
 in a browser.

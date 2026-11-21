@@ -14,8 +14,10 @@ import os from 'node:os';
 import path from 'node:path';
 
 export const APP_ID = 'com.devon7y.laytekz';
-export const DEFAULT_SERVER_URL = 'https://latex.devon7y.com';
-export const SITE_URL = 'https://latex.devon7y.com';
+export const DEFAULT_SERVER_URL = 'https://laytekz.devon7y.com';
+export const SITE_URL = 'https://laytekz.devon7y.com';
+/** Server addresses that moved: settings saved under an old one are carried to the new one at load. */
+export const MOVED_SERVERS = { 'https://latex.devon7y.com': 'https://laytekz.devon7y.com' };
 /** The project Laytekz is based on (the credit in About, as on the web app's). */
 export const UPSTREAM_NAME = 'Aldine';
 export const UPSTREAM_URL = 'https://github.com/trahloff/Aldine';

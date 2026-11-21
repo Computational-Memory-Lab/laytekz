@@ -1,7 +1,7 @@
 {
   "name": "laytekz",
   "productName": "Laytekz",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Desktop app for Laytekz, a self-hosted collaborative LaTeX editor",
   "author": "Computational Memory Lab",
   "license": "MIT",
