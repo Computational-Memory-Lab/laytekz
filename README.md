@@ -7,6 +7,8 @@ everything (projects, history, accounts) stays on a server you run yourself.
 It comes in two forms that share one interface: a website served by your
 server, and a desktop app for macOS and Windows that connects to it.
 
+![The Laytekz editor with LaTeX source on the left and the typeset PDF on the right](docs/screenshots/hero-light.png)
+
 ## What it does
 
 - **Real-time co-editing.** Everyone's cursor and edits appear live, the way
@@ -42,6 +44,47 @@ server, and a desktop app for macOS and Windows that connects to it.
 - **Sign in with Google.** New accounts wait for an administrator's approval,
   unless their address is on the administrator's approved list.
 - **Sandboxed typesetting.** Each compile runs confined to its own project.
+
+## A closer look
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/collaboration.png" alt="Two collaborators' labelled cursors in the source and a comment thread in the Review panel"><br>Co-editing in real time. Every cursor and selection carries its owner's name, and comments are answered in Review.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/pdf-comments.png" alt="A comment made on PDF text, shown on the matching source and in the Review panel"><br>Select text in the PDF and comment on it. The comment lands on the matching source.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/math-preview.png" alt="Hovering an inline formula in the source shows it typeset in a popup"><br>Hover over maths in the source to see it typeset.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/statistics.png" alt="The statistics picker listing correlation tests, and the inserted result in APA style"><br>Statistics commands. Pick a test, type the numbers, and get them formatted in APA style.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/tables-picker.png" alt="The table grid picker with a 6 by 5 table selected"><br>A grid picker inserts a table of the size you choose.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/tables-tidy.png" alt="A generated results table before and after tidying its columns"><br>Tidy table lines up the columns of a table.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/citations.png" alt="The citation picker searching the project's bibliography"><br>The citation picker searches the project's references and writes the command your packages expect.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/crossrefs.png" alt="The cross-reference picker listing figures by caption"><br>The cross-reference picker finds figures, tables and sections by their captions.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/references.png" alt="The References panel with online search results, two marked as already in the project"><br>Search for a paper by title, DOI or arXiv ID. Results already in the project are marked.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/wordcount.png" alt="The word count breakdown by part and kind of text"><br>Word counts leave out the title page, references, tables and supplementary material.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/highlighter.png" alt="Source lines highlighted in several colours, listed in the sidebar"><br>Highlight source in colours of your choosing.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/visual.png" alt="Visual mode showing rendered headings and maths beside the PDF"><br>Visual mode renders headings and maths in place, leaving the source untouched.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/rename.png" alt="The rename preview listing the references that will be updated"><br>Renaming the main file previews every reference it will update.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/suggest.png" alt="A grey inline suggestion completing a word in the source"><br>Optional grey suggestions complete the word with Tab.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/settings.png" alt="The Appearance section of Settings"><br>Settings for appearance, fonts and editor behaviour.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/projects.png" alt="The Projects page with first-page thumbnails"><br>Every project on the server, each shown by its first page.</td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/screenshots/hero-dark.png" alt="The editor in the dark theme"><br>Light, dark, or match the system.</td>
+<td width="50%" valign="top"><img src="docs/screenshots/desk-pet.png" alt="The desk pet perched on the edge of a PDF page"><br>An optional desk pet hops around the window and squeaks when clicked.</td>
+</tr>
+</table>
 
 ## Get the desktop app
 
